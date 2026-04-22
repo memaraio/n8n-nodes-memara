@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-memara",
-  "version": "1.0.3",
+  "version": "2.1.1",
   "description": "n8n community node for Memara memory system - Store and retrieve memories with semantic search in your workflows",
   "keywords": [
     "n8n-community-node-package",
@@ -23,21 +23,34 @@
     "url": "https://github.com/memara-memory/n8n-nodes-memara.git"
   },
   "engines": {
-    "node": ">=20.15"
+    "node": ">=22.0.0"
   },
   "main": "index.js",
   "scripts": {
     "build": "npx rimraf dist && tsc && gulp build:icons",
+    "verify:pack": "node scripts/verify-pack.mjs",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint 'nodes/**/*.ts' 'credentials/**/*.ts' package.json",
     "lintfix": "eslint 'nodes/**/*.ts' 'credentials/**/*.ts' package.json --fix",
+    "scan:npm": "npx @n8n/scan-community-package n8n-nodes-memara",
     "prepublishOnly": "npm run build",
     "docker:start": "./scripts/docker-n8n.sh start",
     "docker:stop": "./scripts/docker-n8n.sh stop",
     "docker:build": "./scripts/docker-n8n.sh build",
     "docker:dev": "./scripts/docker-n8n.sh dev",
-    "docker:test": "./scripts/docker-n8n.sh test"
+    "docker:test": "./scripts/docker-n8n.sh test",
+    "docker:lint": "./scripts/docker-n8n.sh lint",
+    "docker:lintfix": "./scripts/docker-n8n.sh lintfix",
+    "docker:format": "./scripts/docker-n8n.sh format",
+    "docker:ci": "./scripts/docker-n8n.sh ci",
+    "docker:scan-npm": "./scripts/docker-n8n.sh scan-npm",
+    "docker:pack": "./scripts/docker-n8n.sh pack",
+    "docker:publish": "./scripts/docker-n8n.sh publish",
+    "docker:publish-release": "./scripts/docker-n8n.sh publish-release",
+    "docker:github-sync": "./scripts/docker-n8n.sh github-sync",
+    "docker:github-tag": "./scripts/docker-n8n.sh github-tag",
+    "docker:github-verify-pat": "./scripts/docker-n8n.sh github-verify-pat"
   },
   "files": [
     "dist"
@@ -48,7 +61,14 @@
       "dist/credentials/MemaraApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Memara/Memara.node.js"
+      "dist/nodes/MemaraCreateMemory/MemaraCreateMemory.node.js",
+      "dist/nodes/MemaraSearchMemories/MemaraSearchMemories.node.js",
+      "dist/nodes/MemaraUpdateMemory/MemaraUpdateMemory.node.js",
+      "dist/nodes/MemaraDeleteMemory/MemaraDeleteMemory.node.js",
+      "dist/nodes/MemaraListMemories/MemaraListMemories.node.js",
+      "dist/nodes/MemaraTriggerNewMemory/MemaraTriggerNewMemory.node.js",
+      "dist/nodes/MemaraTriggerMemoryUpdated/MemaraTriggerMemoryUpdated.node.js",
+      "dist/nodes/MemaraTriggerSearchMatch/MemaraTriggerSearchMatch.node.js"
     ]
   },
   "devDependencies": {
@@ -56,6 +76,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "gulp": "^5.0.0",
+    "n8n-workflow": "^2.13.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

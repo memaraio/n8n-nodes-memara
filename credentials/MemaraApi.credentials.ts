@@ -1,3 +1,4 @@
+import type { Icon } from 'n8n-workflow';
 import {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
@@ -8,7 +9,8 @@ import {
 export class MemaraApi implements ICredentialType {
 	name = 'memaraApi';
 	displayName = 'Memara API';
-	documentationUrl = 'https://docs.memara.io/integrations/n8n';
+	icon: Icon = 'file:memara.svg';
+	documentationUrl = 'https://memara.io/docs/integrations/n8n';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
@@ -40,7 +42,7 @@ export class MemaraApi implements ICredentialType {
 			headers: {
 				'Authorization': '=Bearer {{$credentials.apiKey}}',
 				'Content-Type': 'application/json',
-				'User-Agent': 'n8n-memara-node/1.0.0',
+				'User-Agent': 'n8n-memara-node/2.1.1',
 			},
 		},
 	};
@@ -49,16 +51,16 @@ export class MemaraApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
-			url: '/v1/spaces',
+			url: '/api/v1/n8n/integration/info',
 			method: 'GET',
 		},
 		rules: [
 			{
 				type: 'responseSuccessBody',
 				properties: {
-					key: 'spaces',
-					value: [],
-					message: 'API key is valid and can access Memara API',
+					key: 'integration_name',
+					value: '',
+					message: 'API key is valid and can access Memara n8n integration',
 				},
 			},
 		],

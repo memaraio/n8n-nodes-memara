@@ -1,0 +1,26 @@
+{
+	"node": "dist/nodes/MemaraSearchMemories/MemaraSearchMemories.node.js",
+	"nodeVersion": "2.0",
+	"codex": {
+		"categories": ["Data & Storage"],
+		"resources": {
+			"primaryDocumentation": [
+				{
+					"url": "https://memara.io/docs/integrations/n8n"
+				}
+			],
+			"credentialDocumentation": [
+				{
+					"url": "https://memara.io/docs/api-keys"
+				}
+			],
+			"generic": [
+				{
+					"label": "Memara Website",
+					"url": "https://memara.io"
+				}
+			]
+		},
+		"alias": ["semantic search", "rag", "query memories", "vector search", "memara"]
+	}
+}

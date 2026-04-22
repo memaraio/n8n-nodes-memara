@@ -1,0 +1,58 @@
+{
+	"name": "Memara new memory trigger (example)",
+	"version": 1,
+	"meta": {
+		"instanceId": "memara-example"
+	},
+	"nodes": [
+		{
+			"parameters": {
+				"limit": 20,
+				"tags": "",
+				"source": "",
+				"minImportance": 0
+			},
+			"id": "memara-trigger-new-memory",
+			"name": "Memara New Memory",
+			"type": "memaraTriggerNewMemory",
+			"typeVersion": 1,
+			"position": [240, 300],
+			"credentials": {
+				"memaraApi": {
+					"id": "REPLACE_WITH_CREDENTIAL_ID",
+					"name": "Memara API"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"jsCode": "// Example: one execution item per new memory from the trigger.\nreturn $input.all();"
+			},
+			"id": "example-downstream",
+			"name": "Example downstream",
+			"type": "n8n-nodes-base.code",
+			"typeVersion": 2,
+			"position": [520, 300]
+		}
+	],
+	"connections": {
+		"Memara New Memory": {
+			"main": [
+				[
+					{
+						"node": "Example downstream",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"staticData": null,
+	"tags": [],
+	"triggerCount": 1,
+	"updatedAt": "2026-04-14T12:00:00.000Z"
+}

@@ -1,257 +1,289 @@
 # Memara n8n Community Node
 
-![Memara Logo](https://raw.githubusercontent.com/memara-ai/brand/main/logos/light/memara_logo_256x256.png)
+![Memara Logo](https://app.memara.io/logos/memara-logo.svg)
 
-A powerful n8n community node that integrates Memara's semantic memory system into your workflows. Store, search, and retrieve memories with AI-powered semantic search capabilities.
+n8n community package **n8n-nodes-memara** integrates Memara’s semantic memory API. Version **2.x** exposes **five action nodes** (one operation each) so you can pick the right step from the node panel without an operation dropdown. From **2.1.0** onward it also ships **three polling triggers** aligned with common Zapier-style patterns (with the API limitations described below).
 
-## 🚀 Features
+## Features
 
-- **Semantic Memory Storage**: Store information with intelligent context understanding
-- **AI-Powered Search**: Find relevant memories using natural language queries
-- **Memory Spaces**: Organize memories in isolated spaces for different projects
-- **CRUD Operations**: Complete create, read, update, delete functionality
-- **API Integration**: Direct integration with Memara's production API
-- **Easy Configuration**: Simple API key authentication setup
+### Action nodes
 
-## 📦 Installation
+- **Memara Create Memory** — store content with optional title and tags
+- **Memara Search Memories** — semantic search with limit
+- **Memara Update Memory** — update by memory ID
+- **Memara Delete Memory** — delete by memory ID
+- **Memara List Memories** — paginated list (limit / offset)
 
-### Option 1: n8n Community Node Installation (Recommended)
+### Polling triggers (2.1+)
 
-1. In your n8n instance, go to **Settings** → **Community Nodes**
-2. Enter the package name: `n8n-nodes-memara`
-3. Click **Install**
+- **Memara Trigger: New Memory** — polls `GET /api/v1/n8n/memories`; first successful poll establishes a baseline (no run), then new items are detected by `created_at` and same-second `id` handling within the configured list window.
+- **Memara Trigger: Memory Updated** — best-effort: compares a fingerprint of list fields per memory **only for memories returned in the current list window**; not a guarantee for the entire space.
+- **Memara Trigger: Search Match** — polls `POST /api/v1/n8n/search`; emits memories whose ids newly appear in the top-N search results. **Similarity scores are not returned** on this API path, so threshold filtering is not supported.
 
-### Option 2: Manual Installation
+**Shared credentials** — one **Memara API** credential for all nodes and triggers.
+
+**AI tools** — action nodes are usable as tools where your n8n version supports it (triggers are not tools).
+
+### Polling costs and limits
+
+Each poll is a real Memara API call and counts toward your plan limits. Triggers only see memories inside the **fetched page** (`limit` ≤ 100 for list, ≤ 50 for search). If more new memories arrive between polls than fit in that window, some may not be observed—design workflows and limits accordingly.
+
+## Installation
+
+### Option 1: Community Nodes (recommended)
+
+1. In n8n: **Settings** → **Community Nodes**
+2. Install package: `n8n-nodes-memara`
+3. Restart n8n if prompted
+
+### Option 2: npm
 
 ```bash
-# Using npm
 npm install n8n-nodes-memara
-
-# Using yarn
-yarn add n8n-nodes-memara
 ```
 
-### Option 3: Development Installation
+### Option 3: Local development
 
 ```bash
-# Clone and install locally
-git clone https://github.com/memara-ai/n8n-nodes-memara.git
+git clone https://github.com/memara-memory/n8n-nodes-memara.git
 cd n8n-nodes-memara
 npm install
 npm run build
 npm link
 
-# Link to your n8n installation
 cd ~/.n8n/nodes
 npm link n8n-nodes-memara
 ```
 
-## 🔧 Configuration
+## Configuration
 
-### 1. Get Your Memara API Key
+### 1. API key
 
-1. Visit [Memara Dashboard](https://app.memara.io)
-2. Go to **Settings** → **API Keys**
-3. Create a new API key
-4. Copy the key (format: `mk_live_...`)
+1. Open [Memara](https://app.memara.io) → **Settings** → **API Keys**
+2. Create a key (format `mk_live_...`)
 
-### 2. Configure Credentials in n8n
+### 2. Credential in n8n
 
-1. In n8n, create a new **Memara API** credential
-2. Enter your API key
-3. (Optional) Set a default Space ID
+1. Create credential **Memara API**
+2. Paste **API Key**
+3. Optionally override **Base URL** (default `https://api.memara.io`)
 4. Test the connection
 
-### 3. Add Memara Node to Workflow
+### 3. Add nodes to a workflow
 
-1. In your workflow, click **Add Node**
-2. Search for "Memara"
-3. Select the Memara node
-4. Choose your configured credentials
+1. **Add node** and search for **Memara**
+2. Choose an **action** node (**Memara Create Memory**, **Memara Search Memories**, etc.) or a **trigger** (**Memara Trigger: New Memory**, etc.)
+3. Attach the same **Memara API** credential to each node
 
-## 📝 Usage Examples
+## Migrating from v1.x
 
-### Basic Memory Creation
+v1 shipped a single node with internal type `memara` and parameters `resource`, `operation`, and operation-specific fields.
+
+**v2 removes that node.** Workflows break until you replace each old node with the matching v2 node:
+
+| v1 `operation` | v2 node | Internal type (`type` in JSON) |
+|----------------|---------|--------------------------------|
+| Create | Memara Create Memory | `memaraCreateMemory` |
+| Search | Memara Search Memories | `memaraSearchMemories` |
+| Update | Memara Update Memory | `memaraUpdateMemory` |
+| Delete | Memara Delete Memory | `memaraDeleteMemory` |
+| List | Memara List Memories | `memaraListMemories` |
+
+Triggers (2.1+):
+
+| Trigger | Internal type (`type` in JSON) |
+|---------|----------------------------------|
+| New Memory | `memaraTriggerNewMemory` |
+| Memory Updated | `memaraTriggerMemoryUpdated` |
+| Search Match | `memaraTriggerSearchMatch` |
+
+Remove `resource` and `operation` from parameters; keep only the fields that node needs (same names as before: `content`, `title`, `tags`, `memoryId`, `query`, `limit`, `offset`).
+
+**Search / List output:** Each run still produces **one item** whose `json` is the **array of memories** (same shape as v1’s search/list output for typical workflows).
+
+## Usage examples (parameters)
+
+### Create (Memara Create Memory)
 
 ```json
 {
-  "resource": "memory",
-  "operation": "create",
-  "content": "Customer John Smith reported billing issue with invoice #12345. Resolved by applying 10% discount due to delayed delivery.",
-  "title": "Customer Issue Resolution",
-  "tags": "customer-service, billing, discount"
+  "content": "Customer reported billing issue #12345. Resolved with 10% credit.",
+  "title": "Customer issue resolution",
+  "tags": "customer-service, billing"
 }
 ```
 
-### Semantic Memory Search
+### Search (Memara Search Memories)
 
 ```json
 {
-  "resource": "memory",
-  "operation": "search",
   "query": "billing problems with customers",
   "limit": 5
 }
 ```
 
-### Memory Space Management
+### Update (Memara Update Memory)
 
 ```json
 {
-  "resource": "space",
-  "operation": "create",
-  "name": "Customer Support",
-  "description": "Knowledge base for customer support team"
+  "memoryId": "mem_...",
+  "content": "Updated content",
+  "title": "Optional title",
+  "tags": "tag1, tag2"
 }
 ```
 
-## 🎯 Common Workflow Patterns
+### Delete (Memara Delete Memory)
 
-### 1. Customer Support Knowledge Base
-
-```
-1. HTTP Request → Fetch support ticket
-2. Memara → Search for similar issues
-3. Memara → Create memory of resolution
-4. Email → Send response to customer
+```json
+{
+  "memoryId": "mem_..."
+}
 ```
 
-### 2. Content Creation Assistant
+### List (Memara List Memories)
 
-```
-1. Webhook → Receive content request
-2. Memara → Search for related content
-3. Code → Generate new content using context
-4. Memara → Store new content as memory
-```
-
-### 3. Lead Qualification System
-
-```
-1. Form → Capture lead information
-2. Memara → Search for similar leads
-3. Memara → Store lead profile
-4. Slack → Alert sales team with context
+```json
+{
+  "limit": 50,
+  "offset": 0
+}
 ```
 
-## 🔍 Available Operations
+## Common workflow patterns
 
-### Memory Operations
+1. **Support KB:** Webhook → **Memara Search Memories** → branch on results → **Memara Create Memory** for new resolutions.
+2. **Content assist:** Schedule or external trigger → **Memara Search Memories** → Code / LLM → **Memara Create Memory**.
+3. **React to new memories:** **Memara Trigger: New Memory** → notify Slack / CRM / internal API (each item is one memory payload plus `_memaraTrigger`).
 
-| Operation | Description | Required Parameters |
-|-----------|-------------|-------------------|
-| **Create** | Store new memory | `content` |
-| **Search** | Find relevant memories | `query` |
-| **Update** | Modify existing memory | `memoryId`, `content` |
-| **Delete** | Remove memory | `memoryId` |
-| **List** | Get all memories | None |
+Example workflow JSON: [`workflows/customer-support-example.json`](workflows/customer-support-example.json). **Polling trigger starter:** [`workflows/new-memory-trigger-example.json`](workflows/new-memory-trigger-example.json).
 
-### Space Operations
+## Parameters reference
 
-| Operation | Description | Required Parameters |
-|-----------|-------------|-------------------|
-| **List** | Get all spaces | None |
-| **Create** | Create new space | `name` |
+| Node | Required | Optional |
+|------|----------|----------|
+| Create Memory | `content` | `title`, `tags` |
+| Search Memories | `query` | `limit` (default 10); emits **one output item per memory** |
+| Update Memory | `memoryId`, `content` | `title`, `tags` |
+| Delete Memory | `memoryId` | — |
+| List Memories | — | `limit` (default 50), `offset` (default 0); emits **one output item per memory** |
+| Trigger: New Memory | — | `limit`, `tags`, `source`, `minImportance` |
+| Trigger: Memory Updated | — | `limit`, `tags`, `source`, `minImportance` |
+| Trigger: Search Match | `query` | `limit`, `workflowId`, `filtersJson` |
 
-## ⚙️ Parameters Reference
+## Troubleshooting
 
-### Memory Parameters
+- **Invalid API key:** Confirm key in Memara dashboard; default API URL is `https://api.memara.io`.
+- **Node not listed:** Reinstall the package, restart n8n, check `npm list n8n-nodes-memara`.
 
-- **Content** (required): The main content/information to store
-- **Title** (optional): Short title for the memory
-- **Tags** (optional): Comma-separated tags for organization
-- **Space ID** (optional): Target space (uses default if not specified)
-- **Memory ID** (required for update/delete): Unique memory identifier
+**Docs:** [memara.io/docs/integrations/n8n](https://memara.io/docs/integrations/n8n) · **Support:** [support@memara.io](mailto:support@memara.io)
 
-### Search Parameters
+## Development
 
-- **Query** (required): Natural language search query
-- **Limit** (optional): Maximum results to return (1-100, default: 10)
-- **Space ID** (optional): Search within specific space
-
-### Space Parameters
-
-- **Name** (required): Space name
-- **Description** (optional): Space description
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### "Invalid API Key" Error
-- Verify your API key is correct and starts with `mk_live_`
-- Check that the key hasn't expired in your Memara dashboard
-- Ensure you're using the production API URL: `https://api.memara.io`
-
-#### "Space Not Found" Error
-- Verify the Space ID exists in your Memara account
-- Check if you have access to the specified space
-- Use the List Spaces operation to see available spaces
-
-#### Node Not Appearing in n8n
-- Restart n8n after installation
-- Check that the package installed correctly: `npm list n8n-nodes-memara`
-- Verify n8n version compatibility (requires n8n 1.0+)
-
-### Getting Help
-
-- **Documentation**: [docs.memara.io](https://docs.memara.io)
-- **API Reference**: [docs.memara.io/api](https://docs.memara.io/api)
-- **Support**: [support@memara.io](mailto:support@memara.io)
-- **Community**: [Join our Discord](https://discord.gg/memara)
-
-## 🧪 Development
-
-### Local Development Setup
+### Local (no Docker)
 
 ```bash
-# Clone the repository
-git clone https://github.com/memara-ai/n8n-nodes-memara.git
+git clone https://github.com/memara-memory/n8n-nodes-memara.git
 cd n8n-nodes-memara
-
-# Start development environment
-./scripts/docker-n8n.sh start
-
-# Access environments
-# Development: http://localhost:5678 (admin/admin)
-# Testing: http://localhost:5679 (admin/admin)
+npm install
+npm run build
+npm run verify:pack
+npm run lint
 ```
 
-### Available Scripts
+### Docker (recommended parity with CI / publish)
+
+Uses [`docker-compose.n8n.yml`](docker-compose.n8n.yml) and [`scripts/docker-n8n.sh`](scripts/docker-n8n.sh). From **`packages/memara-n8n-node`**:
+
+| Goal | Command |
+|------|---------|
+| Start n8n + dev container | `./scripts/docker-n8n.sh dev` or `npm run docker:dev` |
+| Build inside container | `./scripts/docker-n8n.sh build` or `npm run docker:build` |
+| Lint | `./scripts/docker-n8n.sh lint` or `npm run docker:lint` |
+| Lint with autofix | `./scripts/docker-n8n.sh lintfix` or `npm run docker:lintfix` |
+| Prettier | `./scripts/docker-n8n.sh format` or `npm run docker:format` |
+| CI gate (build + verify tarball + lint) | `./scripts/docker-n8n.sh ci` or `npm run docker:ci` |
+| npm pack tarball | `./scripts/docker-n8n.sh pack` or `npm run docker:pack` |
+| Publish to npm | `./scripts/docker-n8n.sh publish` (see below) |
+| Verify GitHub PAT | `./scripts/docker-n8n.sh github-verify-pat` or `npm run docker:github-verify-pat` |
+| Mirror package to public GitHub `main` | `./scripts/docker-n8n.sh github-sync` or `npm run docker:github-sync` |
+| Push release tag `v*` to public GitHub | `./scripts/docker-n8n.sh github-tag` or `npm run docker:github-tag` |
+
+After a local build, **`npm run verify:pack`** runs `npm pack` and checks the archive for unexpected paths (for example stray third-party `dist` artifacts). The same step runs inside **`docker-n8n.sh ci`** before lint.
+
+**n8n community verification scanner** (queries the **public npm** package `n8n-nodes-memara`—useful after you publish a version):
 
 ```bash
-# Build the node
-./scripts/docker-n8n.sh build
-
-# Run linter
-./scripts/docker-n8n.sh lint
-
-# View logs
-./scripts/docker-n8n.sh logs
-
-# Execute commands in container
-./scripts/docker-n8n.sh exec npm test
+npm run docker:scan-npm
+# or locally: npm run scan:npm
 ```
 
-## 📄 License
+### Team: mirror to GitHub from the monorepo (same idea as Memara Python SDK)
 
-MIT License - see [LICENSE.md](LICENSE.md) for details
+Maintainers can sync this directory to **[memara-memory/n8n-nodes-memara](https://github.com/memara-memory/n8n-nodes-memara)** using Docker: git runs **inside** `memara-n8n-dev` in an ephemeral **`/tmp`** clone, populated with **`tar`** from **`/app`** (the bind-mounted package). You do **not** need a nested `.git` under `packages/memara-n8n-node`, and you do **not** need the memara monorepo git root to equal this folder.
 
-## 🤝 Contributing
+1. Put a **fine-grained PAT** (Contents read/write on that repo; for releases also **Releases** write when using `publish-release`) in **`packages/memara-n8n-node/.env.github`** (single line).
+2. From **`packages/memara-n8n-node`**:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+```bash
+./scripts/docker-n8n.sh github-verify-pat
+./scripts/docker-n8n.sh github-sync
+# non-interactive:
+./scripts/docker-n8n.sh github-sync --yes
+# after sync, push annotated tag v<version> from package.json:
+./scripts/docker-n8n.sh github-tag --yes
+```
 
-## 📞 Support
+`github-sync` excludes build secrets and artifacts (`.env*`, `dist`, `node_modules`, etc.); the public repo receives **sources** so GitHub Actions or local builds can produce `dist`.
 
-- **Website**: [memara.io](https://memara.io)
-- **Documentation**: [docs.memara.io](https://docs.memara.io)
-- **Email**: [support@memara.io](mailto:support@memara.io)
-- **GitHub Issues**: [Report a bug](https://github.com/memara-ai/n8n-nodes-memara/issues)
+### One-shot: CI, GitHub mirror, npm, and GitHub Release
+
+From **`packages/memara-n8n-node`** (including inside the **memara** monorepo): bump and **commit** `package.json` version, then:
+
+1. **`packages/memara-n8n-node/.env.github`** — GitHub PAT as above (needs **Releases** permission for the API step in `publish-release`).
+2. **`packages/memara-n8n-node/.env.npm`** — npm token (same as publish below).
+
+```bash
+./scripts/docker-n8n.sh publish-release
+# or: npm run docker:publish-release
+# or: ./scripts/release-publish.sh --yes
+./scripts/docker-n8n.sh publish-release --yes
+```
+
+This runs **Docker CI** (`build` → `verify:pack` → `lint`), **`github-sync`** (mirror to public `main`), **`github-tag`**, **`publish`** to npm, then creates a **GitHub Release** on the host via the REST API (PAT never printed).
+
+If this package lives inside a parent git repo, **uncommitted changes under `packages/memara-n8n-node`** must be clean before `publish-release` runs (paths are scoped to that directory).
+
+### Publish to npm via Docker
+
+Publishing is **manual** (nothing is published from CI in this repo unless you run it). Bump **`package.json` version**, then:
+
+1. Put your npm access token in **`packages/memara-n8n-node/.env.npm`** (single line, no variable name). The file is gitignored.
+2. From **`packages/memara-n8n-node`**:
+
+```bash
+./scripts/docker-n8n.sh publish
+# or: npm run docker:publish
+# non-interactive:
+./scripts/docker-n8n.sh publish --yes
+```
+
+The script starts **`memara-n8n-dev`** if needed, runs `npm run build` in the container, then publishes using a temporary npm userconfig so your token is not written to the repo’s `package.json` or a persistent `.npmrc`.
+
+### GitHub Actions and npm provenance (n8n verified nodes)
+
+For **n8n Cloud verified** community nodes, npm expects **provenance** from **GitHub Actions** (see [Submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/#submit-your-node-for-verification-by-n8n)). This package includes [`.github/workflows/publish-npm.yml`](.github/workflows/publish-npm.yml), which publishes with `npm publish --access public --provenance` when you publish a **GitHub Release** (or run the workflow manually).
+
+1. In the npm package settings, connect a **Trusted Publisher** to **`memara-memory/n8n-nodes-memara`** (or your fork) and this workflow, so OIDC can authenticate publishes where possible.
+2. Add repository secret **`NPM_TOKEN`** with a granular **Automation** token that can publish `n8n-nodes-memara` (required until Trusted Publisher fully replaces token auth for your account).
+3. Keep **GitHub `package.json` version and git tags** aligned with each npm release so reviewers can verify source.
+
+**If publish fails with `403` / two-factor authentication:** npm requires either an interactive publish with OTP, or a **granular access token** that includes **Publish** for `n8n-nodes-memara` and the **“Bypass two-factor authentication”** option (or equivalent automation permission). Classic tokens alone are often blocked when 2FA is enabled on the account.
+
+## License
+
+MIT — see [LICENSE.md](LICENSE.md).
 
 ---
 
-Made with ❤️ by the [Memara Team](https://memara.io)
+Made with care by the [Memara](https://memara.io) team.

@@ -1,0 +1,26 @@
+{
+	"node": "dist/nodes/MemaraTriggerNewMemory/MemaraTriggerNewMemory.node.js",
+	"nodeVersion": "2.1",
+	"codex": {
+		"categories": ["Data & Storage"],
+		"resources": {
+			"primaryDocumentation": [
+				{
+					"url": "https://memara.io/docs/integrations/n8n"
+				}
+			],
+			"credentialDocumentation": [
+				{
+					"url": "https://memara.io/docs/api-keys"
+				}
+			],
+			"generic": [
+				{
+					"label": "Memara Website",
+					"url": "https://memara.io"
+				}
+			]
+		},
+		"alias": ["memara", "trigger", "new memory", "polling", "semantic memory"]
+	}
+}

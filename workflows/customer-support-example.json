@@ -26,15 +26,12 @@
     },
     {
       "parameters": {
-        "resource": "memory",
-        "operation": "search",
         "query": "={{ $json.issueType }} {{ $json.description }}",
-        "limit": 3,
-        "spaceId": "customer-support"
+        "limit": 3
       },
       "id": "search-similar-issues",
       "name": "Search Similar Issues",
-      "type": "memara",
+      "type": "memaraSearchMemories",
       "typeVersion": 1,
       "position": [680, 300],
       "credentials": {
@@ -85,16 +82,13 @@
     },
     {
       "parameters": {
-        "resource": "memory",
-        "operation": "create",
         "content": "Ticket #{{ $('Extract Issue Data').first().json.ticketId }}: {{ $('Extract Issue Data').first().json.customerName }} - {{ $('Extract Issue Data').first().json.description }}\\n\\nResolution: [To be filled by agent]\\n\\nSimilar issues found: {{ $json.suggestedResolutions.length }}",
         "title": "{{ $('Extract Issue Data').first().json.issueType }} - {{ $('Extract Issue Data').first().json.customerName }}",
-        "tags": "customer-support,{{ $('Extract Issue Data').first().json.issueType }},{{ $('Extract Issue Data').first().json.priority }}",
-        "spaceId": "customer-support"
+        "tags": "customer-support,{{ $('Extract Issue Data').first().json.issueType }},{{ $('Extract Issue Data').first().json.priority }}"
       },
       "id": "store-new-ticket",
       "name": "Store New Ticket",
-      "type": "memara",
+      "type": "memaraCreateMemory",
       "typeVersion": 1,
       "position": [1340, 300],
       "credentials": {
