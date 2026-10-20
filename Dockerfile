@@ -18,7 +18,7 @@ RUN git config --global user.name "Memara" && \
 RUN if [ -f .env.github ] && [ -s .env.github ]; then \
 		export GITHUB_TOKEN="$(cat .env.github)" && \
 		git init && \
-		git remote add origin "https://${GITHUB_TOKEN}@github.com/memara-memory/n8n-nodes-memara.git" && \
+		git remote add origin "https://${GITHUB_TOKEN}@github.com/memaraio/n8n-nodes-memara.git" && \
 		git config --global credential.helper store && \
 		echo "https://${GITHUB_TOKEN}@github.com" > ~/.git-credentials; \
 	fi

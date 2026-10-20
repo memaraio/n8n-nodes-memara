@@ -4,8 +4,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes } from 'n8n-workflow';
 
 import { memaraRequest } from '../shared/memaraBase';
 import { continueOnFailItem } from '../shared/memaraExecuteHelpers';
@@ -37,7 +38,7 @@ export class MemaraListMemories implements INodeType {
 				name: 'limit',
 				type: 'number',
 				default: 50,
-				description: 'Maximum number of memories to return',
+				description: 'Max number of results to return',
 				typeOptions: {
 					minValue: 1,
 					maxValue: 100,
@@ -84,7 +85,7 @@ export class MemaraListMemories implements INodeType {
 					returnData.push(continueOnFailItem(i, error));
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error as JsonObject);
 			}
 		}
 
