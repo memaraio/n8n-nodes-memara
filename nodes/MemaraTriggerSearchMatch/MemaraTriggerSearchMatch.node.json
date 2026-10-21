@@ -6,12 +6,12 @@
 		"resources": {
 			"primaryDocumentation": [
 				{
-					"url": "https://memara.io/docs/integrations/n8n"
+					"url": "https://memara.io/integrations/n8n"
 				}
 			],
 			"credentialDocumentation": [
 				{
-					"url": "https://memara.io/docs/api-keys"
+					"url": "https://memara.io/docs"
 				}
 			],
 			"generic": [

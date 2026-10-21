@@ -4,8 +4,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes } from 'n8n-workflow';
 
 import { memaraRequest } from '../shared/memaraBase';
 import { continueOnFailItem } from '../shared/memaraExecuteHelpers';
@@ -45,8 +46,8 @@ export class MemaraSearchMemories implements INodeType {
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
-				default: 10,
-				description: 'Maximum number of memories to return',
+				default: 50,
+				description: 'Max number of results to return',
 				typeOptions: {
 					minValue: 1,
 					maxValue: 100,
@@ -63,7 +64,7 @@ export class MemaraSearchMemories implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const query = this.getNodeParameter('query', i) as string;
-				const limit = (this.getNodeParameter('limit', i) as number) || 10;
+				const limit = (this.getNodeParameter('limit', i) as number) || 50;
 
 				const response = (await memaraRequest(this, {
 					method: 'POST',
@@ -83,7 +84,7 @@ export class MemaraSearchMemories implements INodeType {
 					returnData.push(continueOnFailItem(i, error));
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error as JsonObject);
 			}
 		}
 

@@ -10,7 +10,7 @@ export class MemaraApi implements ICredentialType {
 	name = 'memaraApi';
 	displayName = 'Memara API';
 	icon: Icon = 'file:memara.svg';
-	documentationUrl = 'https://memara.io/docs/integrations/n8n';
+	documentationUrl = 'https://memara.io/integrations/n8n';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
@@ -42,7 +42,7 @@ export class MemaraApi implements ICredentialType {
 			headers: {
 				'Authorization': '=Bearer {{$credentials.apiKey}}',
 				'Content-Type': 'application/json',
-				'User-Agent': 'n8n-memara-node/2.1.1',
+				'User-Agent': 'n8n-memara-node/2.1.2',
 			},
 		},
 	};

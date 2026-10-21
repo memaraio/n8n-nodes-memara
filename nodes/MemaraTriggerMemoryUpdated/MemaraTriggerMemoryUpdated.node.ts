@@ -50,7 +50,7 @@ export class MemaraTriggerMemoryUpdated implements INodeType {
 				name: 'limit',
 				type: 'number',
 				default: 50,
-				description: 'Maximum memories fetched per poll (1–100)',
+				description: 'Max number of results to return',
 				typeOptions: {
 					minValue: 1,
 					maxValue: 100,
@@ -75,7 +75,7 @@ export class MemaraTriggerMemoryUpdated implements INodeType {
 				name: 'minImportance',
 				type: 'number',
 				default: 0,
-				description: 'Optional minimum importance (1–10). Use 0 to disable',
+				description: 'Optional minimum importance (1–10). Use 0 to disable.',
 				typeOptions: {
 					minValue: 0,
 					maxValue: 10,

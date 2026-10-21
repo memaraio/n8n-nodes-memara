@@ -1,5 +1,5 @@
 # Publishes n8n-nodes-memara to npm with provenance (n8n verified-node requirement from May 2026).
-# Intended for the standalone https://github.com/memara-memory/n8n-nodes-memara repo (this path is the repo root after sync).
+# Intended for the standalone https://github.com/memaraio/n8n-nodes-memara repo (this path is the repo root after sync).
 name: Publish to npm
 
 on:

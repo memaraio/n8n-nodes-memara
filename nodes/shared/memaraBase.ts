@@ -9,7 +9,7 @@ import { NodeApiError } from 'n8n-workflow';
 /** Context types that can call Memara HTTP APIs with `memaraApi` credentials. */
 export type MemaraRequestContext = IExecuteFunctions | IPollFunctions;
 
-export const MEMARA_USER_AGENT = 'n8n-memara-node/2.1.1';
+export const MEMARA_USER_AGENT = 'n8n-memara-node/2.1.2';
 
 function unknownToJsonObject(error: unknown): JsonObject {
 	if (error instanceof Error) {
@@ -76,9 +76,10 @@ export async function memaraRequest(
 			},
 		});
 	} catch (error) {
-		if (error instanceof NodeApiError) {
-			throw error;
-		}
-		throw new NodeApiError(ctx.getNode(), unknownToJsonObject(error));
+		const payload =
+			error instanceof NodeApiError || (error !== null && typeof error === 'object')
+				? (error as JsonObject)
+				: unknownToJsonObject(error);
+		throw new NodeApiError(ctx.getNode(), payload);
 	}
 }

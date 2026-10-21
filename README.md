@@ -45,7 +45,7 @@ npm install n8n-nodes-memara
 ### Option 3: Local development
 
 ```bash
-git clone https://github.com/memara-memory/n8n-nodes-memara.git
+git clone https://github.com/memaraio/n8n-nodes-memara.git
 cd n8n-nodes-memara
 npm install
 npm run build
@@ -163,7 +163,7 @@ Example workflow JSON: [`workflows/customer-support-example.json`](workflows/cus
 | Node | Required | Optional |
 |------|----------|----------|
 | Create Memory | `content` | `title`, `tags` |
-| Search Memories | `query` | `limit` (default 10); emits **one output item per memory** |
+| Search Memories | `query` | `limit` (default 50); emits **one output item per memory** |
 | Update Memory | `memoryId`, `content` | `title`, `tags` |
 | Delete Memory | `memoryId` | — |
 | List Memories | — | `limit` (default 50), `offset` (default 0); emits **one output item per memory** |
@@ -176,14 +176,14 @@ Example workflow JSON: [`workflows/customer-support-example.json`](workflows/cus
 - **Invalid API key:** Confirm key in Memara dashboard; default API URL is `https://api.memara.io`.
 - **Node not listed:** Reinstall the package, restart n8n, check `npm list n8n-nodes-memara`.
 
-**Docs:** [memara.io/docs/integrations/n8n](https://memara.io/docs/integrations/n8n) · **Support:** [support@memara.io](mailto:support@memara.io)
+**Docs:** [memara.io/integrations/n8n](https://memara.io/integrations/n8n) · **Support:** [support@memara.io](mailto:support@memara.io)
 
 ## Development
 
 ### Local (no Docker)
 
 ```bash
-git clone https://github.com/memara-memory/n8n-nodes-memara.git
+git clone https://github.com/memaraio/n8n-nodes-memara.git
 cd n8n-nodes-memara
 npm install
 npm run build
@@ -220,7 +220,7 @@ npm run docker:scan-npm
 
 ### Team: mirror to GitHub from the monorepo (same idea as Memara Python SDK)
 
-Maintainers can sync this directory to **[memara-memory/n8n-nodes-memara](https://github.com/memara-memory/n8n-nodes-memara)** using Docker: git runs **inside** `memara-n8n-dev` in an ephemeral **`/tmp`** clone, populated with **`tar`** from **`/app`** (the bind-mounted package). You do **not** need a nested `.git` under `packages/memara-n8n-node`, and you do **not** need the memara monorepo git root to equal this folder.
+Maintainers can sync this directory to **[memaraio/n8n-nodes-memara](https://github.com/memaraio/n8n-nodes-memara)** using Docker: git runs **inside** `memara-n8n-dev` in an ephemeral **`/tmp`** clone, populated with **`tar`** from **`/app`** (the bind-mounted package). You do **not** need a nested `.git` under `packages/memara-n8n-node`, and you do **not** need the memara monorepo git root to equal this folder.
 
 1. Put a **fine-grained PAT** (Contents read/write on that repo; for releases also **Releases** write when using `publish-release`) in **`packages/memara-n8n-node/.env.github`** (single line).
 2. From **`packages/memara-n8n-node`**:
@@ -274,7 +274,7 @@ The script starts **`memara-n8n-dev`** if needed, runs `npm run build` in the co
 
 For **n8n Cloud verified** community nodes, npm expects **provenance** from **GitHub Actions** (see [Submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/#submit-your-node-for-verification-by-n8n)). This package includes [`.github/workflows/publish-npm.yml`](.github/workflows/publish-npm.yml), which publishes with `npm publish --access public --provenance` when you publish a **GitHub Release** (or run the workflow manually).
 
-1. In the npm package settings, connect a **Trusted Publisher** to **`memara-memory/n8n-nodes-memara`** (or your fork) and this workflow, so OIDC can authenticate publishes where possible.
+1. In the npm package settings, connect a **Trusted Publisher** to **`memaraio/n8n-nodes-memara`** (or your fork) and this workflow, so OIDC can authenticate publishes where possible.
 2. Add repository secret **`NPM_TOKEN`** with a granular **Automation** token that can publish `n8n-nodes-memara` (required until Trusted Publisher fully replaces token auth for your account).
 3. Keep **GitHub `package.json` version and git tags** aligned with each npm release so reviewers can verify source.
 

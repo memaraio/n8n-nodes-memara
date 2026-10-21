@@ -68,8 +68,8 @@ export class MemaraTriggerSearchMatch implements INodeType {
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
-				default: 10,
-				description: 'Maximum results per poll (1–50)',
+				default: 50,
+				description: 'Max number of results to return',
 				typeOptions: {
 					minValue: 1,
 					maxValue: 50,
@@ -104,7 +104,7 @@ export class MemaraTriggerSearchMatch implements INodeType {
 		}
 
 		const limit = Math.min(
-			Math.max(Number(this.getNodeParameter('limit', 10)) || 10, 1),
+			Math.max(Number(this.getNodeParameter('limit', 50)) || 50, 1),
 			50,
 		);
 		const workflowIdRaw = String(this.getNodeParameter('workflowId', '') ?? '').trim();

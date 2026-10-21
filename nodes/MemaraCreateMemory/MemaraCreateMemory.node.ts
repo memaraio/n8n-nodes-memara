@@ -4,8 +4,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes } from 'n8n-workflow';
 
 import { memaraRequest, parseTagsCsv } from '../shared/memaraBase';
 import { continueOnFailItem } from '../shared/memaraExecuteHelpers';
@@ -98,7 +99,7 @@ export class MemaraCreateMemory implements INodeType {
 					returnData.push(continueOnFailItem(i, error));
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error as JsonObject);
 			}
 		}
 
